@@ -2,40 +2,34 @@
  <div class="content">
    <button class="add-to-cart" @click="addToCart()">Add to Cart</button>
     <div class="top-row">
-      <div class="top part">
-        <div class="robot-name">
+        <!-- <div class="robot-name">
           {{ selectRobot.head.title }}
           <span class="sale" v-if="selectRobot.head.onSale">Sale!</span>
-        </div>
-        <img v-bind:src="selectRobot.head.src" title="head"/>
-        <button @click="selectPreviousHead()" class="prev-selector">&#9658;</button>
-        <button @click="selectNextHead()" class="next-selector">&#9668;</button>
-        
-      </div>
+        </div> -->
+        <PartSelector
+         :parts="availableParts.heads"
+         position="top"
+         @partSelected=" part => selectRobot.head = part"/>
     </div>
     <div class="middle-row">
-      <div class="left part">
-        <img v-bind:src="selectRobot.leftArm.src" title="left arm"/>
-        <button  @click="selectPreviousLeftArm()" class="prev-selector">&#9650;</button>
-        <button  @click="selectNextLeftArm()" class="next-selector">&#9660;</button>
-      </div>
-      <div class="center part">
-        <img v-bind:src="selectRobot.torso.src" title="left arm"/>
-        <button @click="selectPreviousTorso()" class="prev-selector">&#9668;</button>
-        <button @click="selectNextTorso()" class="next-selector">&#9658;</button>
-      </div>
-      <div class="right part">
-        <img v-bind:src="selectRobot.rightArm.src" title="right arm"/>
-        <button @click="selectPreviousRightArm()" class="prev-selector">&#9650;</button>
-        <button @click="selectNextRightArm()" class="next-selector">&#9660;</button>
-      </div>
+      <PartSelector
+        :parts="availableParts.arms"
+        position="left"
+        @partSelected=" part => selectRobot.leftArm = part" />
+      <PartSelector
+       :parts="availableParts.torsos"
+       position="center"
+       @partSelected=" part => selectRobot.torso = part" />
+       <PartSelector
+        :parts="availableParts.arms"
+        position="right"
+        @partSelected=" part => selectRobot.rightArm = part" />
     </div>
     <div class="bottom-row">
-      <div class="bottom part">
-        <img v-bind:src="selectRobot.base.src" title="left arm"/>
-        <button @click="selectPreviousBase()" class="prev-selector">&#9668;</button>
-        <button @click="selectNextBase()" class="next-selector">&#9658;</button>
-      </div>
+      <PartSelector 
+        :parts="availableParts.bases"
+        position="bottom"
+        @partSelected=" part => selectRobot.base = part" />
     </div>
     <div>
       <h1>Cart</h1>
@@ -61,41 +55,27 @@
 <script>
 
 import availableParts from '../data/parts';
-
-function getNextValidIndex(index, length) {
-  const incrementedIndex = index + 1
-  return incrementedIndex > length - 1 ? 0 : incrementedIndex; 
-}
-
-function getPreviousValidIndex(index, length) {
-  const deprecatedIndex = index - 1
-  return deprecatedIndex < 0 ? length - 1 : deprecatedIndex; 
-}
+import createdHookMixin from './created-hookmixin.js';
+import PartSelector from "./PartSelector.vue";
 
 export default {
   name: 'RobotBuilder',
+  components: { PartSelector },
   data() {
     return {
       availableParts,
       cart: [],
-      selectedHeadIndex: 0,
-      selectedLeftArmIndex: 0,
-      selectedRightArmIndex: 0,
-      selectedTorsoIndex: 0,
-      selectedBaseIndex: 0,
+      selectRobot: {
+        head: {},
+        leftArm: {},
+        torso: {},
+        rightArm: {},
+        base: {},
+      },
 
     };
   },
   computed: {
-    selectRobot(){
-      return {
-        head: availableParts.heads[this.selectedHeadIndex],
-        leftArm: availableParts.arms[this.selectedLeftArmIndex],
-        torso: availableParts.torsos[this.selectedTorsoIndex],
-        rightArm: availableParts.arms[this.selectedRightArmIndex],
-        base: availableParts.bases[this.selectedBaseIndex],
-      }
-    }
     
   },
   methods: {
@@ -103,70 +83,7 @@ export default {
       const robot = this.selectRobot;
       const cost = robot.head.cost + robot.leftArm.cost + robot.torso.cost + robot.rightArm.cost + robot.base.cost;
       this.cart.push(Object.assign({}, robot, {  cost }));
-    },
-    selectNextHead() {
-      this.selectedHeadIndex = getNextValidIndex(
-        this.selectedHeadIndex, 
-        availableParts.heads.length
-        )
-    },
-    selectPreviousHead(){
-      this.selectedHeadIndex = getPreviousValidIndex(
-        this.selectedHeadIndex, 
-        availableParts.heads.length
-      )
-    },
-    selectNextLeftArm() {
-      this.selectedLeftArmIndex = getNextValidIndex(
-        this.selectedLeftArmIndex, 
-        availableParts.arms.length
-        )
-    },
-    selectPreviousLeftArm(){
-      this.selectedLeftArmIndex = getPreviousValidIndex(
-        this.selectedLeftArmIndex, 
-        availableParts.arms.length
-      )
-    },
-    selectNextTorso() {
-      this.selectedTorsoIndex = getNextValidIndex(
-        this.selectedTorsoIndex, 
-        availableParts.torsos.length
-        )
-    },
-    selectPreviousTorso(){
-      this.selectedTorsoIndex = getPreviousValidIndex(
-        this.selectedTorsoIndex, 
-        availableParts.torsos.length
-      )
-    },
-
-    selectNextRightArm() {
-      this.selectedRightArmIndex = getNextValidIndex(
-        this.selectedRightArmIndex, 
-        availableParts.arms.length
-        )
-    },
-    selectPreviousRightArm(){
-      this.selectedRightArmIndex = getPreviousValidIndex(
-        this.selectedRightArmIndex, 
-        availableParts.arms.length
-      )
-    },
-
-    selectNextBase() {
-      this.selectedBaseIndex = getNextValidIndex(
-        this.selectedBaseIndex, 
-        availableParts.bases.length
-        )
-    },
-    selectPreviousBase(){
-      this.selectedBaseIndex = getPreviousValidIndex(
-        this.selectedBaseIndex, 
-        availableParts.bases.length
-      )
-    },
-    
+    },    
   }
 };
 </script>
@@ -281,5 +198,13 @@ export default {
   width: 220px;
   padding: 3px;
   font-size:16px;
+}
+td, th {
+  text-align: left;
+  padding: 5px;
+  padding-right: 20px;
+}
+.cost {
+  text-align: right;
 }
 </style>
